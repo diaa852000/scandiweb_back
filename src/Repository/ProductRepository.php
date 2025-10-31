@@ -37,12 +37,25 @@ class ProductRepository extends EntityRepository
         }
     }
 
-    public function delete(Product $product): void
-    {
-        $em = $this->getEntityManager();
+
+public function delete(Product $product): void
+{
+    $em = $this->getEntityManager();
+    $em->beginTransaction();
+    try {
+        if (!$em->contains($product)) {
+            $product = $em->merge($product);
+        }
+
         $em->remove($product);
         $em->flush();
+        $em->commit();
+    } catch (\Throwable $e) {
+        $em->rollback();
+        throw $e;
     }
+}
+
 
     public function findProductsByCategory(string $category_id): array
     {

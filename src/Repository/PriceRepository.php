@@ -14,13 +14,6 @@ class PriceRepository extends EntityRepository
         $em->persist($price);
     }
 
-    // public function save(Price $price): void
-    // {
-    //     $em = $this->getEntityManager();
-    //     $em->persist($price);
-    //     $em->flush();
-    // }
-
     public function delete(Price $price): void
     {
         $em = $this->getEntityManager();

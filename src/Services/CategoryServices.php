@@ -48,7 +48,7 @@ class CategoryServices
         return $category;
     }
 
-    public function deleteCategory(int $id): bool
+    public function deleteCategory(string $id): bool
     {
         $category = $this->categoryRepository->find($id);
         if (!$category) {
@@ -64,5 +64,10 @@ class CategoryServices
     {
         $category = $this->categoryRepository->findCategoryByName($id);
         return $category;
+    }
+
+    public function getAllCategories(): array
+    {
+        return $this->categoryRepository->findAllCategories();
     }
 }

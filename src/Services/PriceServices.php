@@ -20,19 +20,18 @@ class PriceServices
         $this->em = $em;
     }
 
-    public function addPrice(Product $product, float $amount, string $currencyLabel, string $currencySymbol): Price
+
+    public function addPrice(Product $product, float $amount, string $currencyLabel, ?string $currencySymbol = null): Price
     {
         $currency = $this->em->getRepository(Currency::class)->findOneBy([
-            'label'  => $currencyLabel,
-            'symbol' => $currencySymbol,
+            'label' => $currencyLabel,
         ]);
 
         if (!$currency) {
-            $currency = new Currency($currencyLabel, $currencySymbol);
+            $currency = new Currency($currencyLabel, $currencySymbol ?? $currencyLabel);
             $this->em->persist($currency);
             $this->em->flush();
         }
-
 
         $price = new Price();
         $price->amount = $amount;
@@ -43,4 +42,5 @@ class PriceServices
 
         return $price;
     }
+
 }

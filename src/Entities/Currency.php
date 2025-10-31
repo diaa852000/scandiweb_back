@@ -12,8 +12,7 @@ class Currency
     #[ORM\Column(type: "string", length: 10)]
     public string $label;
 
-    #[ORM\Id]
-    #[ORM\Column(type: "string", length: 5)]
+    #[ORM\Column(type: "string", length: 5, unique: true)]
     public string $symbol;
 
     public function __construct(string $label, string $symbol)

@@ -104,7 +104,6 @@ class AttributeServices
         $this->em->persist($item);
     }
 
-    // ✅ Always ensure bidirectional link (new or existing)
     if (!$attribute->items->contains($item)) {
         $attribute->items->add($item);
     }

@@ -26,14 +26,21 @@ class ProductServices
     private CategoryServices $categoryServices;
     private AttributeServices $attributeServices;
 
-    public function __construct(ProductRepository $productRepository, EntityManagerInterface $em)
-    {
+
+    public function __construct(
+        ProductRepository $productRepository,
+        CategoryServices $categoryServices,
+        AttributeServices $attributeServices,
+        GalleryServices $galleryServices,
+        PriceServices $priceServices,
+        EntityManagerInterface $em
+    ){
         $this->productRepository = $productRepository;
+        $this->categoryServices = $categoryServices;
+        $this->attributeServices = $attributeServices;
+        $this->galleryServices = $galleryServices;
+        $this->priceServices = $priceServices;
         $this->em = $em;
-        $this->galleryServices = new GalleryServices($em->getRepository(Gallery::class));
-        $this->priceServices = new PriceServices($em->getRepository(Price::class), $em);
-        $this->categoryServices = new CategoryServices($em->getRepository(Category::class));
-        $this->attributeServices = new AttributeServices($em->getRepository(Attribute::class), $em->getRepository(AttributeItem::class), $em);
     }
 
     public function getAllProducts(): array
@@ -149,14 +156,17 @@ public function createProduct(
 
     public function deleteProduct(string $id): bool
     {
-        $product = $this->productRepository->findProductById($id);
+        $product = $this->em->find(Product::class, $id);
         if (!$product) {
             return false;
         }
 
-        $this->productRepository->delete($product);
+        $this->em->remove($product);
+        $this->em->flush();
         return true;
-    }
+}
+
+
 
     public function getProductsByCategory(string $category_id): array
     {

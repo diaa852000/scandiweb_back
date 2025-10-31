@@ -5,7 +5,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-// #[ORM\Entity]
 #[ORM\Entity(repositoryClass: \App\Repository\ProductRepository::class)]
 #[ORM\Table(name: "Product")]
 class Product
@@ -30,8 +29,14 @@ class Product
     #[ORM\JoinColumn(name: "category_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
     public ?Category $category = null;
 
-    #[ORM\OneToMany(mappedBy: "product", targetEntity: Gallery::class, cascade: ["persist", "remove"])]
+    #[ORM\OneToMany(mappedBy: "product", targetEntity: Gallery::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     public Collection $gallery;
+
+    #[ORM\OneToMany(mappedBy: "product", targetEntity: Price::class, cascade: ["persist", "remove"], orphanRemoval: true)]
+    public Collection $prices;
+
+    #[ORM\OneToMany(mappedBy: "product", targetEntity: OrderItem::class, cascade: ["persist", "remove"], orphanRemoval: true)]
+    public Collection $orderItems;
 
     #[ORM\ManyToMany(targetEntity: Attribute::class, inversedBy: "products")]
     #[ORM\JoinTable(
@@ -41,24 +46,14 @@ class Product
     )]
     public Collection $attributes;
 
-    #[ORM\OneToMany(mappedBy: "product", targetEntity: Price::class, cascade: ["persist", "remove"])]
-    public Collection $prices;
-
-    #[ORM\OneToMany(mappedBy: "product", targetEntity: AttributeItem::class, cascade: ["persist", "remove"])]
-    public Collection $attributeItems;
-
-    #[ORM\OneToMany(mappedBy: "product", targetEntity: OrderItem::class, cascade: ["persist", "remove"])]
-    public Collection $orderItems;
-
-
     public function __construct()
     {
         $this->gallery = new ArrayCollection();
-        $this->attributes = new ArrayCollection();
         $this->prices = new ArrayCollection();
-        $this->attributeItems = new ArrayCollection();
         $this->orderItems = new ArrayCollection();
+        $this->attributes = new ArrayCollection();
     }
+
 
     public function addAttribute(Attribute $attribute): void
     {

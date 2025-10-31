@@ -13,6 +13,7 @@ class Router
             $r->post('/category', [\App\Controller\CategoryController::class, 'handle']);
             $r->post('/product', [\App\Controller\ProductController::class, 'handle']);
             $r->post('/order', [\App\Controller\OrderController::class, 'handle']);
+            $r->post('/graphql', [\App\Controller\GraphQLController::class, 'handle']);
         });
     }
 }

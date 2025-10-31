@@ -8,7 +8,11 @@ class CategoryRepository extends EntityRepository
 {
     public function findAllCategories(): array
     {
-        return $this->findAll();
+        try {
+            return $this->findAll();
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     public function findCategoryByName(string $name): ?Category
