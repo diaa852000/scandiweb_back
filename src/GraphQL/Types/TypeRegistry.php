@@ -6,6 +6,7 @@ use App\GraphQL\Types\CategoryType;
 use App\GraphQL\Types\ProductType;
 use App\GraphQL\Types\PriceType;
 use App\GraphQL\Types\CurrencyType;
+use App\GraphQL\Types\OrderType;
 use App\GraphQL\Types\AttributeSetType;
 use App\GraphQL\Types\AttributeItemType;
 
@@ -44,6 +45,11 @@ class TypeRegistry
     public static function attributeItem(): AttributeItemType
     {
         return self::$types['AttributeItem'] ??= new AttributeItemType();
+    }
+
+    public static function order(): OrderType
+    {
+        return self::$types['Order'] ??= new OrderType();
     }
 
 

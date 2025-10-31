@@ -6,6 +6,7 @@ use App\GraphQL\Query\CategoryQuery;
 use App\GraphQL\Query\ProductQuery;
 use App\GraphQL\Mutation\CategoryMutation;
 use App\GraphQL\Mutation\ProductMutation;
+use App\GraphQL\Mutation\OrderMutation;
 
 use App\Entities\Category;
 use App\Entities\Attribute;
@@ -13,12 +14,15 @@ use App\Entities\Price;
 use App\Entities\Gallery;
 use App\Entities\AttributeItem;
 use App\Entities\Product;
+use App\Entities\Order;
+use App\Entities\OrderItem;
 
 use App\Services\CategoryServices;
 use App\Services\AttributeServices;
 use App\Services\GalleryServices;
 use App\Services\PriceServices;
 use App\Services\ProductServices;
+use App\Services\OrderServices;
 
 use Doctrine\ORM\EntityManagerInterface;
 use GraphQL\Type\Definition\ObjectType;
@@ -53,11 +57,22 @@ class SchemaFactory
             $em
         );
 
+
+        $orderRepo = $em->getRepository(Order::class);
+        $orderItemRepo = $em->getRepository(OrderItem::class);
+        $orderService = new OrderServices(
+            $em,
+            $orderRepo,
+            $orderItemRepo,
+            $productRepo
+        );
+
         $categoryQuery = new CategoryQuery($categoryService);
         $productQuery = new ProductQuery($productService);
 
         $categoryMutation = new CategoryMutation($categoryService);
         $productMutation = new ProductMutation($productService);
+        $orderMutation = new OrderMutation($orderService);
 
         $queryType = new ObjectType([
             'name' => 'Query',
@@ -71,7 +86,8 @@ class SchemaFactory
             'name' => 'Mutation',
             'fields' => fn() => array_merge(
                 $categoryMutation->getFields(),
-                $productMutation->getFields()
+                $productMutation->getFields(),
+                $orderMutation->getFields()
             ),
         ]);
 

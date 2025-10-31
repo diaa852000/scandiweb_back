@@ -164,9 +164,7 @@ public function createProduct(
         $this->em->remove($product);
         $this->em->flush();
         return true;
-}
-
-
+    }
 
     public function getProductsByCategory(string $category_id): array
     {
