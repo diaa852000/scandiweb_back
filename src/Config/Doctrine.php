@@ -19,8 +19,8 @@ class Doctrine
             'dbname'   => 'ecommerce_db',
             'user'     => 'ecommerce_user',
             'password' => 'userpassword',
-            'host'     => 'db',
-            'host'     => '136.112.103.156',
+            'host'     => 'localhost', //local
+            // 'host'     => '136.112.103.156', live
             'driver'   => 'pdo_mysql',
             'charset'  => 'utf8mb4',
             'port'     => 3306

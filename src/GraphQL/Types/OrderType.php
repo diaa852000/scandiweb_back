@@ -11,7 +11,7 @@ class OrderType extends ObjectType
     {
         $config = [
             'name' => 'Order',
-            'fields' => [
+            'fields' => fn() => [
                     'id' => Type::nonNull(Type::int()),
                     'total' => Type::float(),
                     'orderItems' => [
