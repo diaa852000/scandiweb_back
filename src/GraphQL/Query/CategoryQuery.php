@@ -2,7 +2,6 @@
 
 namespace App\GraphQL\Query;
 
-use App\GraphQL\Types\CategoryType;
 use App\Services\CategoryServices;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -17,7 +16,7 @@ class CategoryQuery extends ObjectType
             'fields' => [
                 'categories' => [
                     'type' => Type::listOf(TypeRegistry::category()),
-                    'resolve' => fn() => $categoryService->getAllCategories(),
+                    'resolve' => fn() => $categoryService->findAll(),
                 ],
                 'category' => [
                     'type' => TypeRegistry::category(),
@@ -25,7 +24,7 @@ class CategoryQuery extends ObjectType
                         'id' => Type::nonNull(Type::string()),
                         'name' => Type::string(),
                     ],
-                    'resolve' => fn($root, $args) => $categoryService->findCategory($args['id']),
+                    'resolve' => fn($root, $args) => $categoryService->findById($args['id']),
                 ],
             ],
         ];

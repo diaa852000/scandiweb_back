@@ -14,4 +14,5 @@ abstract class BaseRepository extends EntityRepository
 
     abstract public function findById(int|string $id): ?object;
 
+    abstract public function getAll(): array;
 }

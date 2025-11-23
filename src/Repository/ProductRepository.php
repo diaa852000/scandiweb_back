@@ -2,60 +2,83 @@
 namespace App\Repository;
 
 use App\Entities\Product;
-use Doctrine\ORM\EntityRepository;
+use App\Repository\BaseRepository;
 
-class ProductRepository extends EntityRepository
+class ProductRepository extends BaseRepository
 {
-    public function findAllCategories(): array
+    public function getAll(): array
     {
         return $this->findAll();
     }
 
-    public function findProductById(string $id): ?Product
+    public function findById(int|string $id): ?Product
     {
         return $this->find($id);
     }
 
-    public function findProductByName(string $name): ?Product
+    #[\Override()]
+    public function create(object $entity): object
     {
-        return $this->findOneBy(['name' => $name]);
-    }
 
-    public function save(Product $product): Product
-    {
-        $em = $this->getEntityManager();
-        $em->beginTransaction();
+        $this->_em->beginTransaction();
         try {
-            $em->persist($product);
-            $em->flush();
-            $em->commit();
-            $em->refresh($product);
-            return $product;
-        } catch (\Throwable $e) {
-            $em->rollback();
+            $this->_em->persist($entity);
+            $this->_em->flush();
+            $this->_em->commit();
+            $this->_em->refresh($entity);
+            return $entity;
+        } catch (\Exception $e) {
+            $this->_em->rollback();
             throw $e;
         }
     }
 
+    #[\Override()]
+    public function delete(object $object): bool
+    {
+        $this->_em->beginTransaction();
+        try {
+            $product = $this->findById($object->id);
+            if (!$product) {
+                throw new \Exception("Product with id '{$object->id}' not found.");
+            }
 
-public function delete(Product $product): void
-{
-    $em = $this->getEntityManager();
-    $em->beginTransaction();
-    try {
-        if (!$em->contains($product)) {
-            $product = $em->merge($product);
+            $this->_em->remove($product);
+            $this->_em->flush();
+            $this->_em->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->_em->rollback();
+            throw $e;
         }
-
-        $em->remove($product);
-        $em->flush();
-        $em->commit();
-    } catch (\Throwable $e) {
-        $em->rollback();
-        throw $e;
     }
-}
 
+    #[\Override()]
+    public function update(object $object): object
+    {
+        $this->_em->beginTransaction();
+        try {
+            $product = $this->findById($object->id);
+            if (!$product) {
+                throw new \Exception("Product with id '{$object->id}' not found.");
+            }
+
+            $product->name = $object->name;
+            $product->in_stock = $object->in_stock;
+            $product->description = $object->description;
+            $product->brand = $object->brand;
+            $product->price = $object->price;
+            $product->gallery = $object->gallery;
+            $product->attributes = $object->attributes;
+
+            $this->_em->flush();
+            $this->_em->commit();
+            return $object;
+        } catch (\Exception $e) {
+            $this->_em->rollback();
+            throw $e;
+        }
+    }
 
     public function findProductsByCategory(string $category_id): array
     {

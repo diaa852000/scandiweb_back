@@ -11,4 +11,6 @@ abstract class BaseServices
 
     abstract public function findById(int|string $id): ?object;
 
+    abstract public function findAll(): array;
+
 }
