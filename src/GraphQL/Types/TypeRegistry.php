@@ -74,4 +74,16 @@ class TypeRegistry
             ],
         ]);
     }
+
+    public static function categoryInput(): InputObjectType
+    {
+        return self::$types['CategoryInput'] ??= new InputObjectType([
+            'name' => 'CategoryInput',
+            'fields' => [
+                'id' => Type::nonNull(Type::string()),
+                'name' => Type::nonNull(Type::string()),
+            ],
+        ]);
+    }
+
 }

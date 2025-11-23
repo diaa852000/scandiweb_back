@@ -4,8 +4,9 @@ namespace App\Services;
 use App\Entities\Category;
 use App\Repository\CategoryRepository;
 use GraphQL\Error\UserError;
+use App\Services\BaseServices;
 
-class CategoryServices
+class CategoryServices extends BaseServices
 {
     private CategoryRepository $categoryRepository;
 
@@ -14,60 +15,62 @@ class CategoryServices
         $this->categoryRepository = $categoryRepository;
     }
 
-    public function createCategory(string $id, string $name): Category
+    #[\Override()]
+    public function create(object $entity): Category
     {
-        $existing = $this->categoryRepository->findCategoryByName($name);
+        $existing = $this->categoryRepository->findById($entity->id);
         if ($existing) {
-            throw new UserError("Category with name '{$name}' already exists.");
+            throw new UserError("Category with name '{$entity->name}' already exists.");
         }
 
         $category = new Category();
-        $category->id = $id;
-        $category->name = $name;
+        $category->id = $entity->id;
+        $category->name = $entity->name;
 
-        $this->categoryRepository->save($category);
+        $this->categoryRepository->create($category);
 
         return $category;
     }
 
-    public function updateCategory(int $id, string $name): ?Category
+    #[\Override()]
+    public function update(object $entity): Category
     {
-        $category = $this->categoryRepository->find($id);
+        $category = $this->categoryRepository->findById($entity->id);
         if (!$category) {
-            return null;
+            throw new \RuntimeException("Category with id '{$entity->id}' not found.");
         }
 
-        $existing = $this->categoryRepository->findCategoryByName($name);
-        if ($existing && $existing->id !== $id) {
-            throw new \RuntimeException("Another category with name '{$name}' already exists.");
+        $existing = $this->categoryRepository->findById($entity->id);
+        if ($existing && $existing->id !== $entity->id) {
+            throw new \RuntimeException("Another category with name '{$entity->name}' already exists.");
         }
 
-        $category->name = $name;
-        $this->categoryRepository->save($category);
+        $category->name = $entity->name;
+        $this->categoryRepository->update($category);
 
         return $category;
     }
 
-    public function deleteCategory(string $id): bool
+    #[\Override()]
+    public function delete(object $entity): bool
     {
-        $category = $this->categoryRepository->find($id);
+        $category = $this->categoryRepository->findById($entity->id);
         if (!$category) {
-            return false;
+            throw new \RuntimeException("Category with id '{$entity->id}' not found.");
         }
 
-        $this->categoryRepository->delete($category);
-
-        return true;
+        return $this->categoryRepository->delete($category);
     }
 
-    public function findCategory(string $id)
+    #[\Override()]
+    public function findAll(): array
     {
-        $category = $this->categoryRepository->findCategoryByName($id);
-        return $category;
+        return $this->categoryRepository->findAll();
     }
 
-    public function getAllCategories(): array
+    #[\Override()]
+    public function findById(int|string $id): ?Category
     {
-        return $this->categoryRepository->findAllCategories();
+        return $this->categoryRepository->findById($id);
     }
 }

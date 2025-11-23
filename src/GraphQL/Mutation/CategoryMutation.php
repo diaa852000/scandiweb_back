@@ -2,8 +2,7 @@
 
 namespace App\GraphQL\Mutation;
 
-use App\GraphQL\Types\CategoryType;
-use App\Repository\CategoryRepository;
+use App\Entities\Category;
 use App\Services\CategoryServices;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -19,25 +18,45 @@ class CategoryMutation extends ObjectType
                 'createCategory' => [
                     'type' => TypeRegistry::category(),
                     'args' => [
-                        'id' => Type::nonNull(Type::string()),
-                        'name' => Type::nonNull(Type::string()),
+                        'category' => Type::nonNull(TypeRegistry::categoryInput()),
                     ],
-                    'resolve' => fn($root, $args) => $categoryService->createCategory($args['id'], $args['name']),
+                    'resolve' => fn($root, $args) =>
+                        $categoryService->create(
+                            (function () use ($args) {
+                                $cat = new Category();
+                                $cat->id = $args['category']['id'];
+                                $cat->name = $args['category']['name'];
+                                return $cat;
+                            })()
+                        ),
+
                 ],
                 'updateCategory' => [
                     'type' => TypeRegistry::category(),
                     'args' => [
-                        'id' => Type::nonNull(Type::string()),
-                        'name' => Type::nonNull(Type::string()),
+                        'category' => Type::nonNull(TypeRegistry::categoryInput()),
                     ],
-                    'resolve' => fn($root, $args) => $categoryService->updateCategory($args['id'], $args['name']),
+                    'resolve' => fn($root, $args) => $categoryService->update(
+                        (function () use ($args) {
+                            $cat = new Category();
+                            $cat->id = $args['category']['id'];
+                            $cat->name = $args['category']['name'];
+                            return $cat;
+                        })()
+                    ),
                 ],
                 'deleteCategory' => [
                     'type' => Type::boolean(),
                     'args' => [
-                        'id' => Type::nonNull(Type::string()),
+                        'category' => Type::nonNull(TypeRegistry::categoryInput()),
                     ],
-                    'resolve' => fn($root, $args) => $categoryService->deleteCategory($args['id']),
+                    'resolve' => fn($root, $args) => $categoryService->delete(
+                        (function () use ($args) {
+                            $cat = new Category();
+                            $cat->id = $args['category']['id'];
+                            return $cat;
+                        })()
+                    ),
                 ],
             ],
         ];

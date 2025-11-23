@@ -2,35 +2,57 @@
 namespace App\Repository;
 
 use App\Entities\Category;
-use Doctrine\ORM\EntityRepository;
 
-class CategoryRepository extends EntityRepository
+class CategoryRepository extends BaseRepository
 {
-    public function findAllCategories(): array
+    #[\Override]
+    public function findAll(): array
     {
-        try {
-            return $this->findAll();
-        } catch (\Exception $e) {
-            throw $e;
+        return parent::findAll();
+    }
+
+    #[\Override]
+    public function findById(int|string $id): ?Category
+    {
+        return $this->_em->find(Category::class, $id);
+    }
+
+    #[\Override]
+    public function create(object $entity): object
+    {
+        if (!$entity instanceof Category) {
+            throw new \InvalidArgumentException("Expected Category entity");
         }
+
+        $this->_em->persist($entity);
+        $this->_em->flush();
+
+        return $entity;
     }
 
-    public function findCategoryByName(string $name): ?Category
+    #[\Override]
+    public function update(object $entity): object
     {
-        return $this->findOneBy(['name' => $name]);
+        if (!$entity instanceof Category) {
+            throw new \InvalidArgumentException("Expected Category entity");
+        }
+
+        $this->_em->persist($entity);
+        $this->_em->flush();
+
+        return $entity;
     }
 
-    public function save(Category $category): void
+    #[\Override]
+    public function delete(object $entity): bool
     {
-        $em = $this->getEntityManager();
-        $em->persist($category);
-        $em->flush();
-    }
+        if (!$entity instanceof Category) {
+            throw new \InvalidArgumentException("Expected Category entity");
+        }
 
-    public function delete(Category $category): void
-    {
-        $em = $this->getEntityManager();
-        $em->remove($category);
-        $em->flush();
+        $this->_em->remove($entity);
+        $this->_em->flush();
+
+        return true;
     }
 }
