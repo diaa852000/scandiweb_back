@@ -5,7 +5,6 @@ use App\Entities\Category;
 
 class CategoryRepository extends BaseRepository
 {
-    #[\Override]
     public function findAll(): array
     {
         return parent::findAll();

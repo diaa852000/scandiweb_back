@@ -62,7 +62,6 @@ class CategoryServices extends BaseServices
         return $this->categoryRepository->delete($category);
     }
 
-    #[\Override()]
     public function findAll(): array
     {
         return $this->categoryRepository->findAll();
