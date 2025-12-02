@@ -12,28 +12,40 @@ class OrderType extends ObjectType
         $config = [
             'name' => 'Order',
             'fields' => fn() => [
-                    'id' => Type::nonNull(Type::int()),
-                    'total' => Type::float(),
-                    'orderItems' => [
-                        'type' => Type::listOf(Type::string()),
-                        'resolve' => function ($order) {
-                            $items = $order->orderItems;
-                            if (!$items || count($items) === 0) {
-                                return [];
-                            }
+                'id' => Type::nonNull(Type::int()),
 
-                            $productNames = [];
-                            foreach ($items as $item) {
-                                $product = $item->product;
-                                if ($product) {
-                                    $productNames[] = $product->name;
-                                }
-                            }
+                'orderItems' => [
+                    'type' => Type::listOf(Type::string()),
+                    'resolve' => function ($order) {
+                        $items = $order->orderItems;
+                        if (!$items || \count($items) === 0) {
+                            return [];
+                        }
 
-                            return $productNames;
-                        },
-                    ],
-                    'created_at' => [
+                        $productNames = [];
+                        foreach ($items as $item) {
+                            $product = $item->product;
+                            if ($product) {
+                                $productNames[] = $product->name;
+                            }
+                        }
+
+                        return $productNames;
+                    },
+                ],
+
+                'total' => [
+                    'type' => Type::float(),
+                    'resolve' => function ($order) {
+                        $total = 0;
+                        foreach ($order->orderItems as $item) {
+                            $total += $item->price * $item->quantity;
+                        }
+                        return $total;
+                    }
+                ],
+
+                'created_at' => [
                     'type' => Type::string(),
                     'resolve' => fn($order) => $order->created_at->format('Y-m-d H:i:s'),
                 ],

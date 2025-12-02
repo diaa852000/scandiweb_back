@@ -18,10 +18,10 @@ class OrderMutation extends ObjectType
                 'createOrder' => [
                     'type' => TypeRegistry::order(),
                     'args' => [
-                            'items' => Type::nonNull(Type::listOf(GraphQLSchemas::orderItemsInputType())),
-                        ],
+                        'items' => Type::nonNull(Type::listOf(GraphQLSchemas::orderItemsInputType())),
+                    ],
                     'resolve' => function ($root, $args) use ($orderServices) {
-                        return $orderServices->placeOrder($args['items']);
+                        return $orderServices->create($args['items']);
                     },
                 ]
             ]

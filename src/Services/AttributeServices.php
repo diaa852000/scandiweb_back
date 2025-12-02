@@ -7,15 +7,16 @@ use App\Repository\AttributeRepository;
 use App\Repository\AttributeItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use GraphQL\Error\UserError;
+use App\Services\BaseServices;
 
-class AttributeServices
+class AttributeServices extends BaseServices
 {
     public function __construct(
         private AttributeRepository $attrRepo,
         private AttributeItemRepository $itemRepo,
         private EntityManagerInterface $em
-    ) {}
-
+    ) {
+    }
 
     public function upsertAttributeWithItemsNoFlush(string $id, string $name, string $type, array $items): Attribute
     {
@@ -37,8 +38,8 @@ class AttributeServices
 
         $seen = [];
         foreach ($items as $i) {
-            foreach (['id','value','displayValue'] as $k) {
-                if (!array_key_exists($k, $i)) {
+            foreach (['id', 'value', 'displayValue'] as $k) {
+                if (!\array_key_exists($k, $i)) {
                     throw new UserError("AttributeItem for '{$id}' missing key '{$k}'");
                 }
             }
@@ -47,14 +48,14 @@ class AttributeServices
 
             if (isset($byId[$i['id']])) {
                 $it = $byId[$i['id']];
-                $it->value        = $i['value'];
+                $it->value = $i['value'];
                 $it->displayValue = $i['displayValue'];
             } else {
                 $it = new AttributeItem();
-                $it->id           = $i['id'];
-                $it->value        = $i['value'];
+                $it->id = $i['id'];
+                $it->value = $i['value'];
                 $it->displayValue = $i['displayValue'];
-                $it->attribute    = $attr;
+                $it->attribute = $attr;
                 $this->em->persist($it);
             }
 
@@ -72,43 +73,48 @@ class AttributeServices
         return $attr;
     }
 
-
-    public function createAttributeItem(Attribute $attribute, string $displayValue, string $value, string $id): AttributeItem
+    public function create(array $data): object
     {
-        $item = new AttributeItem();
-        $item->id = $id;
-        $item->displayValue = $displayValue;
-        $item->value = $value;
-        $item->attribute = $attribute;
+        $attr = new Attribute();
+        $attr->id = $data['id'];
+        $attr->name = $data['name'];
+        $attr->value = $data['value'];
+        $attr->displayValue = $data['displayValue'];
+        $attr->items = new \Doctrine\Common\Collections\ArrayCollection();
 
-        $this->em->persist($item);
-
-        return $item;
+        return $this->attrRepo->create($attr);
     }
 
-    public function upsertAttributeItem(Attribute $attribute, array $data): AttributeItem
-{
-    $id = $data['id'];
-    $value = $data['value'];
-    $displayValue = $data['displayValue'];
+    public function update(int|string $id, array $data): object
+    {
+        $entity = $this->attrRepo->findById($id);
+        if (!$entity) {
+            throw new \Exception("Entity with ID {$id} not found for update");
+        }
+        if (isset($data['name'])) {
+            $entity->name = $data['name'];
+        }
+        if (isset($data['type'])) {
+            $entity->type = $data['type'];
+        }
 
-    $repo = $this->em->getRepository(AttributeItem::class);
-    $item = $repo->find($id);
-
-    if (!$item) {
-        $item = new AttributeItem();
-        $item->id = $id;
-        $item->value = $value;
-        $item->displayValue = $displayValue;
-        $item->attribute = $attribute;
-        $this->em->persist($item);
+        return $this->attrRepo->update($entity);
+    }
+    public function delete(int|string $id): bool
+    {
+        $entity = $this->attrRepo->findById($id);
+        if (!$entity) {
+            throw new \Exception("Entity with ID {$id} not found for deletion");
+        }
+        return $this->attrRepo->delete($entity);
+    }
+    public function findAll(): array
+    {
+        return $this->attrRepo->findAll();
     }
 
-    if (!$attribute->items->contains($item)) {
-        $attribute->items->add($item);
+    public function findById(int|string $id): object|null
+    {
+        return $this->attrRepo->findById($id);
     }
-
-    return $item;
-}
-
 }

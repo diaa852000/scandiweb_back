@@ -54,38 +54,97 @@ class ProductServices extends BaseServices
         return $this->productRepository->findById($id);
     }
 
+    // public function create(array $data): Product
+    // {
+    //     $existing = $this->productRepository->findById($data['id']);
+    //     if ($existing) {
+    //         throw new UserError("Product with id '{$data['id']}' already exists.");
+    //     }
 
-    public function create(object $entity): Product
+    //     $product = new Product();
+    //     $product->id = $data['id'];
+    //     $product->name = $data['name'];
+    //     $product->in_stock = $data['in_stock'];
+    //     $product->description = $data['description'];
+    //     $product->brand = $data['brand'];
+
+    //     if ($data['category_id'] !== null) {
+    //         $category = $this->categoryServices->findById($data['category_id']);
+    //         if (!$category) {
+    //             throw new UserError("Category with id '{$data['category_Id']}' not found.");
+    //         }
+    //         $product->category = $category;
+    //     }
+
+    //     $product->gallery = new ArrayCollection();
+    //     foreach ($data['gallery'] as $url) {
+    //         $this->galleryServices->addGalleryItem($product, $url);
+    //     }
+
+    //     foreach ($data['prices'] as $p) {
+    //         if (!isset($p['amount'], $p['currency']['label'], $p['currency']['symbol'])) {
+    //             throw new UserError("Invalid price input. Expected { amount, currency: { label, symbol } }");
+    //         }
+    //         $this->priceServices->addPrice(
+    //             $product,
+    //             (float) $p['amount'],
+    //             $p['currency']['label'],
+    //             $p['currency']['symbol']
+    //         );
+    //     }
+
+    //     foreach ($entity->attributes ?? [] as $set) {
+    //         if (!isset($set['id'])) {
+    //             throw new UserError("Each attribute must have an 'id'.");
+    //         }
+    //         $name = $set['name'] ?? $set['id'];
+    //         $type = $set['type'] ?? 'text';
+    //         $items = $set['items'] ?? [];
+
+    //         $attr = $this->attributeServices->upsertAttributeWithItemsNoFlush(
+    //             $set['id'],
+    //             $name,
+    //             $type,
+    //             $items
+    //         );
+
+    //         $product->addAttribute($attr);
+    //     }
+
+    //     return $this->productRepository->create($product);
+    // }
+
+
+    public function create(array $data): Product
     {
-        $existing = $this->productRepository->findById($entity->id);
+        $existing = $this->productRepository->findById($data['id']);
         if ($existing) {
-            throw new UserError("Product with id '{$entity->id}' already exists.");
+            throw new UserError("Product with id '{$data['id']}' already exists.");
         }
 
         $product = new Product();
-        $product->id = $entity->id;
-        $product->name = $entity->name;
-        $product->in_stock = $entity->in_stock;
-        $product->description = $entity->description;
-        $product->brand = $entity->brand;
+        $product->id = $data['id'];
+        $product->name = $data['name'];
+        $product->in_stock = $data['in_stock'];
+        $product->description = $data['description'];
+        $product->brand = $data['brand'];
 
-        if ($entity->category !== null) {
-            $category = $this->categoryServices->findCategory($entity->category_Id);
+        // Category
+        if ($data['category_id'] !== null) {
+            $category = $this->categoryServices->findById($data['category_id']);
             if (!$category) {
-                throw new UserError("Category with id '{$entity->category_Id}' not found.");
+                throw new UserError("Category with id '{$data['category_id']}' not found.");
             }
             $product->category = $category;
         }
 
-        $product->gallery = new ArrayCollection();
-        foreach ($entity->gallery as $url) {
+        // GALLERY
+        foreach ($data['gallery'] ?? [] as $url) {
             $this->galleryServices->addGalleryItem($product, $url);
         }
 
-        foreach ($entity->prices as $p) {
-            if (!isset($p['amount'], $p['currency']['label'], $p['currency']['symbol'])) {
-                throw new UserError("Invalid price input. Expected { amount, currency: { label, symbol } }");
-            }
+        // PRICES
+        foreach ($data['prices'] ?? [] as $p) {
             $this->priceServices->addPrice(
                 $product,
                 (float) $p['amount'],
@@ -94,19 +153,13 @@ class ProductServices extends BaseServices
             );
         }
 
-        foreach ($entity->attributes ?? [] as $set) {
-            if (!isset($set['id'])) {
-                throw new UserError("Each attribute must have an 'id'.");
-            }
-            $name = $set['name'] ?? $set['id'];
-            $type = $set['type'] ?? 'text';
-            $items = $set['items'] ?? [];
-
+        // ATTRIBUTES (FIXED VARIABLE NAME)
+        foreach ($data['attributes'] ?? [] as $set) {
             $attr = $this->attributeServices->upsertAttributeWithItemsNoFlush(
                 $set['id'],
-                $name,
-                $type,
-                $items
+                $set['name'] ?? $set['id'],
+                $set['type'] ?? 'text',
+                $set['items'] ?? []
             );
 
             $product->addAttribute($attr);
@@ -115,27 +168,26 @@ class ProductServices extends BaseServices
         return $this->productRepository->create($product);
     }
 
-
-    public function update(object $entity): Product
+    public function update(int|string $id, array $data): Product
     {
-        $product = $this->productRepository->findProductById($entity->id);
+        $product = $this->productRepository->findById($id);
         if (!$product) {
-            throw new UserError("Product with id '{$entity->id}' not found.");
+            throw new UserError("Product with id '{$id}' not found.");
         }
 
-        if ($entity->name !== null)
-            $product->name = $entity->name;
-        if ($entity->inStock !== null)
-            $product->in_stock = $entity->inStock;
-        if ($entity->description !== null)
-            $product->description = $entity->description;
-        if ($entity->brand !== null)
-            $product->brand = $entity->brand;
+        if ($data['name'] !== null)
+            $product->name = $data['name'];
+        if ($data['inStock'] !== null)
+            $product->in_stock = $data['in_stock'];
+        if ($data['description'] !== null)
+            $product->description = $data['description'];
+        if ($data['brand'] !== null)
+            $product->brand = $data['brand'];
 
-        if ($entity->category !== null) {
-            $category = $this->categoryServices->findById($entity->category);
+        if ($data['category'] !== null) {
+            $category = $this->categoryServices->findById($data['category']);
             if (!$category) {
-                throw new UserError("Category with id '{$entity->category}' not found.");
+                throw new UserError("Category with id '{$data['category']}' not found.");
             }
             $product->category = $category;
         }
@@ -144,9 +196,9 @@ class ProductServices extends BaseServices
         return $product;
     }
 
-    public function delete(object $entity): bool
+    public function delete(int|string $id): bool
     {
-        $product = $this->productRepository->findById($entity->id);
+        $product = $this->productRepository->findById($id);
         if (!$product) {
             return false;
         }

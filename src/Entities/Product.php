@@ -72,4 +72,30 @@ class Product
         }
     }
 
+    public function addGalleryItem(Gallery $gallery): void
+    {
+        if (!$this->gallery->contains($gallery)) {
+            $this->gallery->add($gallery);
+            $gallery->product = $this; // keep both sides in sync
+        }
+    }
+
+    public function addPrice(Price $price): void
+    {
+        if (!$this->prices->contains($price)) {
+            $this->prices->add($price);
+            $price->product = $this;
+        }
+    }
+
+    public function removePrice(Price $price): void
+    {
+        if ($this->prices->removeElement($price)) {
+            if ($price->product === $this) {
+                $price->product = null;
+            }
+        }
+    }
+
+
 }

@@ -8,9 +8,9 @@ interface IBaseRepository
 
     public function create(object $entity): object;
 
-    public function update(object $entity): void;
+    public function update(object $entity): object;
 
-    public function delete(object $entity): void;
+    public function delete(object $entity): bool;
 
     public function findById(int|string $id): ?object;
 }

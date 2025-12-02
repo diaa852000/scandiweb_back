@@ -27,16 +27,16 @@ class Order
     public function __construct()
     {
         $this->created_at = new \DateTime();
-        $this->orderItems  = new ArrayCollection();
+        $this->orderItems = new ArrayCollection();
     }
 
     public function addOrderItem(OrderItem $item): self
-{
-    if (!$this->orderItems->contains($item)) {
-        $this->orderItems->add($item);
-        $item->order = $this;
+    {
+        if (!$this->orderItems->contains($item)) {
+            $this->orderItems->add($item);
+            $item->order = $this;
+        }
+        return $this;
     }
-    return $this;
-}
 
 }

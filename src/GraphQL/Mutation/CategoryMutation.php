@@ -22,12 +22,13 @@ class CategoryMutation extends ObjectType
                     ],
                     'resolve' => fn($root, $args) =>
                         $categoryService->create(
-                            (function () use ($args) {
-                                $cat = new Category();
-                                $cat->id = $args['category']['id'];
-                                $cat->name = $args['category']['name'];
-                                return $cat;
-                            })()
+                            // (function () use ($args) {
+                            //     $cat = new Category();
+                            //     $cat->id = $args['category']['id'];
+                            //     $cat->name = $args['category']['name'];
+                            //     return $cat;
+                            // })()
+                            [$args["id"], $args["name"]],
                         ),
 
                 ],
@@ -37,12 +38,8 @@ class CategoryMutation extends ObjectType
                         'category' => Type::nonNull(TypeRegistry::categoryInput()),
                     ],
                     'resolve' => fn($root, $args) => $categoryService->update(
-                        (function () use ($args) {
-                            $cat = new Category();
-                            $cat->id = $args['category']['id'];
-                            $cat->name = $args['category']['name'];
-                            return $cat;
-                        })()
+                        $args['id'],
+                        [$args["id"], $args["name"]],
                     ),
                 ],
                 'deleteCategory' => [
@@ -51,11 +48,7 @@ class CategoryMutation extends ObjectType
                         'category' => Type::nonNull(TypeRegistry::categoryInput()),
                     ],
                     'resolve' => fn($root, $args) => $categoryService->delete(
-                        (function () use ($args) {
-                            $cat = new Category();
-                            $cat->id = $args['category']['id'];
-                            return $cat;
-                        })()
+                        $args['id'],
                     ),
                 ],
             ],

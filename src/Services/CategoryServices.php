@@ -15,48 +15,44 @@ class CategoryServices extends BaseServices
         $this->categoryRepository = $categoryRepository;
     }
 
-    #[\Override()]
-    public function create(object $entity): Category
+    public function create(array $data): Category
     {
-        $existing = $this->categoryRepository->findById($entity->id);
+        $existing = $this->categoryRepository->findById($data['id']);
         if ($existing) {
-            throw new UserError("Category with name '{$entity->name}' already exists.");
+            throw new UserError("Category with id '{$data['id']}' already exists.");
         }
 
         $category = new Category();
-        $category->id = $entity->id;
-        $category->name = $entity->name;
+        $category->id = $data['id'];
+        $category->name = $data['name'];
 
         $this->categoryRepository->create($category);
 
         return $category;
     }
 
-    #[\Override()]
-    public function update(object $entity): Category
+    public function update(int|string $id, array $data): Category
     {
-        $category = $this->categoryRepository->findById($entity->id);
+        $category = $this->categoryRepository->findById($id);
         if (!$category) {
-            throw new \RuntimeException("Category with id '{$entity->id}' not found.");
+            throw new \RuntimeException("Category with id '{$id}' not found.");
         }
 
-        $existing = $this->categoryRepository->findById($entity->id);
-        if ($existing && $existing->id !== $entity->id) {
-            throw new \RuntimeException("Another category with name '{$entity->name}' already exists.");
+        if (!isset($data['name'])) {
+            throw new \RuntimeException("Category name is required.");
         }
 
-        $category->name = $entity->name;
+        $category->name = $data['name'];
         $this->categoryRepository->update($category);
 
         return $category;
     }
 
-    #[\Override()]
-    public function delete(object $entity): bool
+    public function delete(int|string $id): bool
     {
-        $category = $this->categoryRepository->findById($entity->id);
+        $category = $this->categoryRepository->findById($id);
         if (!$category) {
-            throw new \RuntimeException("Category with id '{$entity->id}' not found.");
+            throw new \RuntimeException("Category with id '{$id}' not found.");
         }
 
         return $this->categoryRepository->delete($category);
@@ -67,7 +63,6 @@ class CategoryServices extends BaseServices
         return $this->categoryRepository->findAll();
     }
 
-    #[\Override()]
     public function findById(int|string $id): ?Category
     {
         return $this->categoryRepository->findById($id);

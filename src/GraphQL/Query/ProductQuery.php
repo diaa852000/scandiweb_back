@@ -16,7 +16,7 @@ class ProductQuery extends ObjectType
             'fields' => [
                 'products' => [
                     'type' => Type::listOf(TypeRegistry::product()),
-                    'resolve' => fn() => $productService->getAllProducts(),
+                    'resolve' => fn() => $productService->findAll(),
                 ],
 
                 'product' => [
@@ -25,7 +25,7 @@ class ProductQuery extends ObjectType
                         'id' => Type::nonNull(Type::string()),
                     ],
                     'resolve' => fn($root, $args) =>
-                        $productService->findOneProduct($args['id']),
+                        $productService->findById($args['id']),
                 ],
 
                 'productsByCategory' => [
@@ -35,8 +35,8 @@ class ProductQuery extends ObjectType
                     ],
                     'resolve' => fn($root, $args) =>
                         $args['category_id'] === 'all'
-                            ? $productService->getAllProducts()
-                            : $productService->getProductsByCategory($args['category_id']),
+                        ? $productService->findAll()
+                        : $productService->getProductsByCategory($args['category_id']),
                 ],
             ],
         ];

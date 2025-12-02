@@ -48,16 +48,19 @@ class ProductMutation extends ObjectType
                         'prices' => Type::listOf(TypeRegistry::priceInput()),
                         'attributes' => Type::listOf(Type::nonNull($attributeSetInput)),
                     ],
-                    'resolve' => fn($root, $args) => $productService->createProduct(
-                        $args['id'],
-                        $args['name'],
-                        $args['in_stock'],
-                        $args['description'] ?? null,
-                        $args['brand'] ?? null,
-                        $args['category_id'] ?? null,
-                        $args['gallery'] ?? [],
-                        $args['prices'] ?? [],
-                        $args['attributes'] ?? []
+                    'resolve' => fn($root, $args) => $productService->create(
+                        // [
+                        //     $args['id'],
+                        //     $args['name'],
+                        //     $args['in_stock'],
+                        //     $args['description'] ?? null,
+                        //     $args['brand'] ?? null,
+                        //     $args['category_id'] ?? null,
+                        //     $args['gallery'] ?? [],
+                        //     $args['prices'] ?? [],
+                        //     $args['attributes'] ?? []
+                        // ]
+                        $args
                     ),
                 ],
 
@@ -74,7 +77,7 @@ class ProductMutation extends ObjectType
                         'prices' => Type::listOf(TypeRegistry::priceInput()),
                         'attributes' => Type::listOf(Type::nonNull($attributeSetInput)),
                     ],
-                    'resolve' => fn($root, $args) => $productService->updateProduct($args),
+                    'resolve' => fn($root, $args) => $productService->update($args["id"], $args),
                 ],
 
                 'deleteProduct' => [
@@ -82,7 +85,7 @@ class ProductMutation extends ObjectType
                     'args' => [
                         'id' => Type::nonNull(Type::string()),
                     ],
-                    'resolve' => fn($root, $args) => $productService->deleteProduct($args['id']),
+                    'resolve' => fn($root, $args) => $productService->delete($args['id']),
                 ],
             ],
         ];
